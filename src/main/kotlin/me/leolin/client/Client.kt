@@ -20,16 +20,22 @@ class ClientVerticle : AbstractVerticle() {
         val client = vertx.createNetClient()
 
         client.connect(2000, "localhost", { result ->
+            println("connected to server, type 'exit' to exit")
+
             val socket = result.result()
             socket.handler { buffer ->
                 val message = buffer.getString(0, buffer.length())
                 println(message)
             }
 
-            Thread{
+            Thread {
                 val scanner = Scanner(System.`in`)
                 while (scanner.hasNext()) {
                     val message = scanner.next()
+                    if (message == "exit") {
+                        client.close()
+                        System.exit(0)
+                    }
                     socket.write(Buffer.buffer().appendString(message))
                 }
             }.start()
